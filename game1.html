@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+    <title>Snake Game</title>
+</head>
+<body>
+    <canvas id="snakeCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("snakeCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const boxSize = 20;
+        const canvasSize = 400;
+
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: 15, y: 15 };
+        let direction = "right";
+        let gameSpeed = 200; // 初始速度
+
+        function draw() {
+            ctx.clearRect(0, 0, canvasSize, canvasSize);
+
+            ctx.fillStyle = "#00F";
+            for (let i = 0; i < snake.length; i++) {
+                ctx.fillRect(snake[i].x * boxSize, snake[i].y * boxSize, boxSize, boxSize);
+            }
+
+            ctx.fillStyle = "#F00";
+            ctx.fillRect(food.x * boxSize, food.y * boxSize, boxSize, boxSize);
+        }
+
+        function update() {
+            let newHead = { ...snake[0] };
+            switch (direction) {
+                case "up":
+                    newHead.y--;
+                    break;
+                case "down":
+                    newHead.y++;
+                    break;
+                case "left":
+                    newHead.x--;
+                    break;
+                case "right":
+                    newHead.x++;
+                    break;
+            }
+
+            if (
+                newHead.x < 0 || newHead.x >= canvasSize / boxSize ||
+                newHead.y < 0 || newHead.y >= canvasSize / boxSize ||
+                snake.some(segment => segment.x === newHead.x && segment.y === newHead.y)
+            ) {
+                alert("Game Over!");
+                resetGame();
+                return;
+            }
+
+            if (newHead.x === food.x && newHead.y === food.y) {
+                food = {
+                    x: Math.floor(Math.random() * (canvasSize / boxSize)),
+                    y: Math.floor(Math.random() * (canvasSize / boxSize)),
+                };
+
+                // 加快遊戲速度
+                gameSpeed -= 10;
+            } else {
+                snake.pop();
+            }
+
+            snake.unshift(newHead);
+        }
+
+        function resetGame() {
+            snake = [{ x: 10, y: 10 }];
+            food = { x: 15, y: 15 };
+            direction = "right";
+            gameSpeed = 200; // 重設速度
+        }
+
+        function keyDownHandler(event) {
+            switch (event.key) {
+                case "ArrowUp":
+                    direction = "up";
+                    break;
+                case "ArrowDown":
+                    direction = "down";
+                    break;
+                case "ArrowLeft":
+                    direction = "left";
+                    break;
+                case "ArrowRight":
+                    direction = "right";
+                    break;
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            setTimeout(gameLoop, gameSpeed);
+        }
+
+        document.addEventListener("keydown", keyDownHandler);
+        gameLoop();
+    </script>
+</body>
+</html>
